@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة المثلث الخاص 🧠</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-top: 20px;
+        }
+        #player-names {
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+        }
+        input {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            width: 80%;
+            transition: border-color 0.3s ease;
+        }
+        input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+            margin: 20px auto;
+            justify-content: center;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            border: 2px solid #2c3e50;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: #ecf0f1;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .cell:hover {
+            background-color: #bdc3c7;
+            transform: scale(1.05);
+        }
+        .cell.x {
+            color: #27ae60;
+        }
+        .cell.o {
+            color: #e74c3c;
+        }
+        #turn-display {
+            font-size: 1.2rem;
+            margin: 20px;
+            color: #2c3e50;
+        }
+        #winner-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 20px;
+            color: #e74c3c;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+        }
+        .modal-content p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        .modal-content button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .modal-content button:hover {
+            background-color: #2980b9;
+        }
+        #instructions-modal {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .instructions-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f39c12;
+            animation: fall 2s infinite ease-in-out;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(0) rotate(0); opacity: 1; }
+            100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="instructions-modal">
+        <div class="instructions-content">
+            <h2>مرحبًا بك في لعبة المثلث الخاص صاحب الزوايا 30 و 60 و 90 🧠</h2>
+            <p>هذه اللعبة تجمع بين المتعة والمعرفة! الهدف منها هو الفوز عبر الإجابة الصحيحة على أسئلة في النظرية: في المثلث القائم الذي زواياه 30 و 60، الضلع المقابل للزاوية 30 يساوي نصف الوتر.</p>
+            <p><strong>كيفية اللعب:</strong></p>
+            <p>1. أدخل أسماء اللاعبين (اللاعب الاول علامته X واللاعب الثاني علامته O)، ثم اضغط على "بدء اللعبة".<br> 2. كل خلية تمثل فرصة للإجابة على سؤال.<br> 3. إذا أجبت بشكل صحيح، يتم وضع العلامة الملائمة للاعب في المكان الملائم وينتقل الدور الى اللاعب الاخر.<br> 4. إذا أجبت بشكل خاطئ، لا يتم وضع أي علامة وينتقل الدور إلى اللاعب الآخر.<br> 5. اللاعب الأول الذي يكمل ثلاثة رموز متتالية (أفقيًا، رأسيًا، أو قطريًا) يفوز!</p>
+            <p>كن مستعدًا لتحدي نفسك وتعلم المزيد!</p>
+            <button onclick="closeInstructions()">ابدأ اللعب الآن</button>
+        </div>
+    </div>
+
+    <h1>لعبة المثلث الخاص 🧠</h1>
+    <div id="player-names">
+        <input type="text" id="player1" placeholder="اسم اللاعب الأول (X)">
+        <input type="text" id="player2" placeholder="اسم اللاعب الثاني (O)">
+        <button onclick="startGame()">بدء اللعبة</button>
+    </div>
+    <div class="board" id="board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+    </div>
+    <div id="turn-display"></div>
+    <div id="winner-display"></div>
+    <button id="restart-button" onclick="restartGame()" style="display:none; margin-top: 20px;">جولة أخرى</button>
+    <div id="math-modal" class="modal">
+        <div class="modal-content">
+            <p id="math-question"></p>
+            <div id="math-answers"></div>
+            <button onclick="closeModal()">إغلاق</button>
+        </div>
+    </div>
+
+    <script>
+        let currentPlayer = 'X';
+        let player1Name = '';
+        let player2Name = '';
+        let boardState = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = false;
+
+        let usedQuestions = new Set();
+
+       
+        const bioQuestions = [
+  { question: "في مثلث قائم زواياه 30° و60° و90°، ما طول الضلع المقابل للزاوية 30° إذا كان طول الوتر 12؟", answers: ["6", "12", "3", "9"], correct: "6" },
+  { question: "ما تعريف العلاقة بين الزاوية 30° وطول ضلعها المقابل في مثلث 30°–60°–90°؟", answers: ["الضلع يساوي نصف الوتر", "الضلع يساوي طول الوتر", "الضلع أكبر من الوتر", "لا علاقة"], correct: "الضلع يساوي نصف الوتر" },
+  { question: "في مثلث 30°–60°–90°، الزاوية 30° تقابل أي ضلع؟", answers: ["الأقصر", "الأطول", "الوتر", "لا يمكن التحديد"], correct: "الأقصر" },
+  { question: "في مثلث 30°–60°–90°، إذا كان الضلع المقابل لـ30° يساوي 8، فما طول الوتر؟", answers: ["16", "4", "8", "12"], correct: "16" },
+  { question: "أي من التالي يعبر بدقة عن خاصية الزاوية 30° في المثلث القائم؟", answers: ["ضلعها المقابل يساوي نصف طول الوتر", "زاوية منفرجة", "ضلعها المقابل يساوي طول الضلع المجاور", "زاوية غير محددة"], correct: "ضلعها المقابل يساوي نصف طول الوتر" },
+  { question: "في مثلث قائم الزاوية، الزاوية 30° تقابل الضلع الذي يساوي:", answers: ["نصف طول الوتر", "نفس طول الزاوية 60°", "نفس طول الضلع المجاور", "الوتر نفسه"], correct: "نصف طول الوتر" },
+  { question: "إذا كان طول الوتر في مثلث 30°–60°–90° هو 20، فما طول الضلع المقابل لـ30°؟", answers: ["10", "15", "5", "20"], correct: "10" },
+  { question: "هل يمكن أن يكون الضلع المقابل لـ30° أطول من الوتر؟", answers: ["لا", "نعم", "في بعض الحالات", "إذا كانت الزاوية 60°"], correct: "لا" },
+  { question: "طالب قال: إذا كان الضلع يساوي نصف الوتر، فإن الزاوية المقابلة هي 30°. هل هذا صحيح؟", answers: ["نعم", "لا", "حسب شكل المثلث", "حسب الطول"], correct: "نعم" },
+  { question: "إذا كان الضلع المقابل لـ30° يساوي 9، فما طول الوتر؟", answers: ["18", "9", "6", "12"], correct: "18" },
+  { question: "أي من الجمل التالية صحيحة دائمًا في مثلث 30°–60°–90°؟", answers: ["الضلع المقابل لـ30° = ½ الوتر", "الوتر = الضلع المجاور لـ30°", "الضلع المجاور لـ30° هو الأقصر", "لا توجد علاقة ثابتة"], correct: "الضلع المقابل لـ30° = ½ الوتر" },
+  { question: "في مثلث قائم، هل العلاقة بين الزاوية 30° وطول ضلعها المقابل تعتمد على نظرية فيثاغورس؟", answers: ["لا مباشرة، بل على العلاقة المعروفة بنصف الوتر", "نعم تمامًا", "ليس هناك علاقة", "فقط في مثلثات متساوية الساقين"], correct: "لا مباشرة، بل على العلاقة المعروفة بنصف الوتر" },
+  { question: "أي من التالي يمثل مثالًا حقيقيًا لتطبيق النظرية؟", answers: ["مثلث قائم فيه الضلع 5 والوتر 10" , "مثلث فيه ضلعان متساويان", "مثلث حاد الزوايا فيه ضلع 6 والوتر 10", "مثلث فيه جميع الزوايا أقل من 90°"], correct: "مثلث قائم فيه الضلع 5 والوتر 10" },
+  { question: "إذا كان ضلع طوله 11 يقابل الزاوية 30°، فما طول الوتر؟", answers: ["22", "11", "5.5", "13"], correct: "22" },
+  { question: "هل هذه الجملة صحيحة؟ (في مثلث 30°–60°–90°، يكون الوتر دائمًا ضعف الضلع المقابل لـ30°)", answers: ["نعم", "لا", "فقط إذا كان المثلث متساوي الأضلاع", "حسب المعطيات"], correct: "نعم" },
+  { question: "عند رسم مثلث 30°–60°–90°، كيف يمكنك التحقق من صحة النظرية؟", answers: ["قارن الضلع المقابل لـ30° مع نصف الوتر", "قس الزاوية 60°", "قس المجاور لـ30°", "اجمع أطوال الأضلاع"], correct: "قارن الضلع المقابل لـ30° مع نصف الوتر" }
+];
+
+        function closeInstructions() {
+            document.getElementById('instructions-modal').style.display = 'none';
+        }
+
+        function startGame() {
+            player1Name = document.getElementById('player1').value || 'اللاعب 1';
+            player2Name = document.getElementById('player2').value || 'اللاعب 2';
+            gameActive = true;
+            document.getElementById('player-names').style.display = 'none';
+            document.getElementById('turn-display').innerText = `دور ${currentPlayer === 'X' ? player1Name : player2Name}`;
+        }
+
+        function checkWinner() {
+            const winningCombinations = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], // صفوف
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], // أعمدة
+                [0, 4, 8], [2, 4, 6]             // أقطار
+            ];
+
+            for (let combo of winningCombinations) {
+                const [a, b, c] = combo;
+                if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+                    return boardState[a];
+                }
+            }
+
+            if (!boardState.includes('')) return 'تعادل';
+            return null;
+        }
+
+        function getUniqueQuestion() {
+            let availableQuestions = bioQuestions.filter((_, i) => !usedQuestions.has(i));
+            if (availableQuestions.length === 0) {
+                usedQuestions.clear(); // إعادة تعيين الأسئلة إذا انتهت جميعها
+                availableQuestions = bioQuestions;
+            }
+            const randomIndex = Math.floor(Math.random() * availableQuestions.length);
+            const questionIndex = bioQuestions.indexOf(availableQuestions[randomIndex]);
+            usedQuestions.add(questionIndex);
+            return bioQuestions[questionIndex];
+        }
+
+        function showBioQuestion(index) {
+            const modal = document.getElementById('math-modal');
+            const question = getUniqueQuestion();
+            document.getElementById('math-question').innerText = question.question;
+            const answersDiv = document.getElementById('math-answers');
+            answersDiv.innerHTML = '';
+            question.answers.sort(() => Math.random() - 0.5).forEach((answer) => {
+                const button = document.createElement('button');
+                button.innerText = answer;
+                button.onclick = () => handleAnswer(index, answer === question.correct);
+                answersDiv.appendChild(button);
+            });
+            modal.style.display = 'flex';
+        }
+
+        function handleAnswer(index, isCorrect) {
+            closeModal();
+            if (isCorrect) {
+                boardState[index] = currentPlayer;
+                document.querySelector(`.cell[data-index="${index}"]`).classList.add(currentPlayer.toLowerCase());
+                document.querySelector(`.cell[data-index="${index}"]`).innerText = currentPlayer;
+                const winner = checkWinner();
+                if (winner) {
+                    endGame(winner);
+                } else {
+                    switchPlayer();
+                }
+            } else {
+                alert("إجابة خاطئة! سيتم الانتقال إلى اللاعب الآخر.");
+                switchPlayer();
+            }
+        }
+
+        function switchPlayer() {
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            document.getElementById('turn-display').innerText = `دور ${currentPlayer === 'X' ? player1Name : player2Name}`;
+        }
+
+        function closeModal() {
+            document.getElementById('math-modal').style.display = 'none';
+        }
+
+        function createConfetti() {
+            const confettiCount = 100;
+            const body = document.body;
+
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                confetti.style.animationDuration = Math.random() * 2 + 2 + 's';
+                body.appendChild(confetti);
+
+                setTimeout(() => {
+                    body.removeChild(confetti);
+                }, 4000);
+            }
+        }
+
+        function endGame(winner) {
+            gameActive = false;
+            createConfetti();
+            if (winner === 'تعادل') {
+                document.getElementById('winner-display').innerText = 'تعادل!';
+            } else {
+                document.getElementById('winner-display').innerText = `الفائز هو ${winner === 'X' ? player1Name : player2Name}!`;
+    document.getElementById('restart-button').style.display = 'block';
+
+            }
+        }
+function restartGame() {
+    boardState = ['', '', '', '', '', '', '', '', ''];
+    gameActive = true;
+    currentPlayer = 'X';
+    document.getElementById('turn-display').innerText = `دور ${player1Name}`;
+    document.getElementById('winner-display').innerText = '';
+    document.getElementById('restart-button').style.display = 'none';
+    
+    // إعادة تعيين الخلايا الفارغة
+    document.querySelectorAll('.cell').forEach(cell => {
+        cell.innerText = '';
+        cell.classList.remove('x', 'o');
+    });
+}
+
+        document.querySelectorAll('.cell').forEach(cell => {
+            cell.addEventListener('click', () => {
+                if (gameActive && !cell.innerText) {
+                    const index = cell.getAttribute('data-index');
+                    showBioQuestion(index);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
